@@ -54,7 +54,7 @@ public class MovieServiceImpl implements MovieService {
         List<MovieResponse> listMovie = new ArrayList<>();
 
         for (Movie dataMovie: movieRepository.findAll()) {
-            if (dataMovie.getDeleted() == null) {
+            if (dataMovie.getDeleted().equals(false)) {
                 MovieResponse response = convertToMovieResponseDTO(dataMovie);
                 listMovie.add(response);
             }
