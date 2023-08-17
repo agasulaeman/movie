@@ -10,6 +10,7 @@ import org.springframework.data.annotation.LastModifiedDate;
 import org.springframework.data.jpa.domain.support.AuditingEntityListener;
 
 import javax.persistence.*;
+import java.time.Instant;
 import java.time.LocalDateTime;
 
 @Setter
@@ -27,7 +28,7 @@ public class BaseEntity {
 
     @Column(name = "created_at", columnDefinition = "DATE")
     @CreatedDate
-    private LocalDateTime createdAt;
+    private Instant createdAt;
 
     @Column(name = "last_modified_by")
     @LastModifiedBy
@@ -38,7 +39,7 @@ public class BaseEntity {
 
     @Column(name = "modified_at", columnDefinition = "DATE")
     @LastModifiedDate
-    private LocalDateTime modifiedAt;
+    private Instant modifiedAt;
 
     @PrePersist
     public void prePersist(){

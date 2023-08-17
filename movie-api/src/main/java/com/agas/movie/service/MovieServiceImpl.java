@@ -16,6 +16,8 @@ import java.sql.Timestamp;
 import java.text.SimpleDateFormat;
 
 import java.time.LocalDateTime;
+import java.time.ZoneId;
+import java.time.format.DateTimeFormatter;
 import java.util.*;
 
 @Service
@@ -25,10 +27,7 @@ public class MovieServiceImpl implements MovieService {
     @Autowired
     private MovieRepository movieRepository;
     ModelMapper modelMapper = new ModelMapper();
-    LocalDateTime currentDateTime = LocalDateTime.now();
-    Date date = Timestamp.valueOf(currentDateTime);
-    SimpleDateFormat dateFormat = new SimpleDateFormat("yyyy-MM-dd HH:mm:ss");
-    String formattedDate = dateFormat.format(date);
+
 
     @Override
     public MovieResponse createMovie(MovieRequest movieRequest) {
@@ -43,8 +42,7 @@ public class MovieServiceImpl implements MovieService {
 
         Movie saveMovie = movieRepository.save(movie);
 
-        MovieResponse response = convertToMovieResponseDTO(saveMovie);
-
+       MovieResponse response = convertToMovieResponseDTO(saveMovie);
         return response;
     }
 
@@ -104,15 +102,17 @@ public class MovieServiceImpl implements MovieService {
             dataMovie.setTitle(movieIndex.getTitle());
             dataMovie.setRating(movieIndex.getRating());
             dataMovie.setImage(movieIndex.getImage());
+            dataMovie.setDescription(movieIndex.getDescription());
 
             Movie resultInput = movieRepository.save(dataMovie);
 
-            MovieResponse response = convertToMovieResponseDTO(resultInput);
-            result.put(Constants.response, HttpStatus.OK);
+            MovieResponse response =   convertToMovieResponseDTO(resultInput);
+
+                    result.put(Constants.response, HttpStatus.OK);
             result.put("message", Constants.success_string);
             result.put("Data", response);
         } catch (Exception e) {
-            result.put(Constants.movie_notfound, HttpStatus.NOT_FOUND);
+            result.put("error_code", HttpStatus.NOT_FOUND);
             result.put("message", Constants.movie_notfound);
         }
         return result;
@@ -139,13 +139,18 @@ public class MovieServiceImpl implements MovieService {
 
     private MovieResponse convertToMovieResponseDTO(Movie movie) {
         MovieResponse dto = new MovieResponse();
+        LocalDateTime localDateCreateTime = movie.getCreatedAt().atZone(ZoneId.of("Asia/Bangkok")).toLocalDateTime();
+        LocalDateTime localDateUpdateTime = movie.getModifiedAt().atZone(ZoneId.of("Asia/Bangkok")).toLocalDateTime();
+        DateTimeFormatter outputFormatter = DateTimeFormatter.ofPattern("yyyy-MM-dd HH:mm:ss");
+        String createDate = localDateCreateTime.format(outputFormatter);
+        String updateDate = localDateUpdateTime.format(outputFormatter);
         dto.setId(movie.getId());
         dto.setTitle(movie.getTitle());
         dto.setDescription(movie.getDescription());
         dto.setRating(movie.getRating());
         dto.setImage(movie.getImage());
-        dto.setCreatedAt(formattedDate);
-        dto.setModifiedAt(formattedDate);
+        dto.setCreatedAt(createDate);
+        dto.setModifiedAt(updateDate);
         return dto;
     }
     private Movie convertToEntity (MovieRequest request) {
